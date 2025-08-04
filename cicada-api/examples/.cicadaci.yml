@@ -1,0 +1,51 @@
+version: "1.0"
+name: "Node.js Build Pipeline"
+description: "A sample pipeline for building and testing Node.js applications"
+
+triggers:
+  branches:
+    - "main"
+    - "develop"
+  events:
+    - "push"
+    - "pull_request"
+
+environment:
+  NODE_ENV: "production"
+  CI: "true"
+
+steps:
+  - name: "install-dependencies"
+    image: "node:18-alpine"
+    commands:
+      - "npm ci"
+    workingDir: "/workspace"
+    timeout: 300000
+
+  - name: "run-tests"
+    image: "node:18-alpine"
+    commands:
+      - "npm test"
+    workingDir: "/workspace"
+    dependsOn:
+      - "install-dependencies"
+    timeout: 300000
+
+  - name: "build-application"
+    image: "node:18-alpine"
+    commands:
+      - "npm run build"
+    workingDir: "/workspace"
+    dependsOn:
+      - "run-tests"
+    timeout: 300000
+
+  - name: "security-scan"
+    image: "alpine:latest"
+    commands:
+      - "echo 'Running security scan...'"
+      - "sleep 5"
+      - "echo 'Security scan completed'"
+    dependsOn:
+      - "build-application"
+    timeout: 120000 

@@ -2,9 +2,16 @@ import Docker from "dockerode";
 
 const docker = new Docker();
 
+interface ContainerOptions {
+  workingDir?: string;
+  environment?: Record<string, string>;
+  timeout?: number;
+}
+
 export async function runCommandInContainer(
   image: string,
-  cmd: string[]
+  cmd: string[],
+  options: ContainerOptions = {}
 ): Promise<{ output: string; error: string }> {
   return new Promise(async (resolve, reject) => {
     try {
@@ -31,6 +38,10 @@ export async function runCommandInContainer(
         AttachStdout: true,
         AttachStderr: true,
         Tty: false,
+        WorkingDir: options.workingDir,
+        Env: options.environment
+          ? Object.entries(options.environment).map(([k, v]) => `${k}=${v}`)
+          : undefined,
       });
 
       // Start container
@@ -46,7 +57,18 @@ export async function runCommandInContainer(
         output += chunk.toString();
       });
 
-      await container.wait();
+      // Wait for container with timeout
+      const waitPromise = container.wait();
+      const timeoutPromise = options.timeout
+        ? new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error("Container timeout")),
+              options.timeout
+            )
+          )
+        : Promise.resolve();
+
+      await Promise.race([waitPromise, timeoutPromise]);
 
       await container.remove();
 

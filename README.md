@@ -1,97 +1,238 @@
-# CicadaCI
+# CicadaCI 🚀
 
-CicadaCI — A self-hosted, Docker-based CI/CD platform where each pipeline step runs inside isolated Docker containers.
+**CicadaCI** — A fully-featured, self-hosted, Docker-based CI/CD platform where each pipeline step runs inside isolated Docker containers with advanced features including authentication, web UI, and comprehensive pipeline management.
 
-## Overview
+## ✨ Features
 
-CicadaCI is designed to provide a robust and flexible CI/CD solution that leverages Docker containers for isolation and scalability. Each step in the pipeline runs in its own Docker container, ensuring that processes are isolated and can be easily managed.
+### 🎛️ **Pipeline Configuration System**
+- **YAML-based configuration** (`.cicadaci.yml`) for defining multi-step builds
+- **Dependency management** between pipeline steps
+- **Parallel execution** of independent steps
+- **Timeout controls** and **working directory** configuration
+- **Environment variables** support at pipeline and step levels
 
-## Features
+### 🧑‍💻 **Modern Web UI Dashboard**
+- **Real-time pipeline monitoring** with live status updates
+- **Beautiful, responsive design** using Tailwind CSS and Vue.js
+- **Interactive pipeline run details** with step-by-step logs
+- **Statistics dashboard** showing success/failure rates
+- **Pipeline cancellation** and management controls
 
-- **Self-hosted**: Run CicadaCI on your own infrastructure, giving you full control over your CI/CD environment.
-- **Docker-based**: Utilize Docker containers to ensure each pipeline step is isolated, reproducible, and scalable.
-- **Express API**: The platform includes an Express-based API for managing webhooks and triggering pipeline runs.
-- **Git Integration**: Automatically clone repositories using webhooks to initiate CI/CD processes.
-- **Docker Runner**: Execute commands within Docker containers using the Docker CLI through Node.js (with plans to integrate `dockerode`).
+### 🔐 **Authentication & RBAC**
+- **JWT-based authentication** with secure token management
+- **Role-based access control** (Admin, User, Viewer roles)
+- **Permission system** for pipeline and run management
+- **Default admin account** for initial setup
 
-## Current Implementation
+### 📊 **Advanced Logging and Monitoring**
+- **Structured logging** with timestamps and log levels
+- **Real-time log streaming** in the web UI
+- **Step-by-step execution tracking**
+- **Error handling** with detailed error messages
 
-- **API Endpoints**:
-  - `/webhook`: Accepts POST requests to trigger repository cloning and pipeline execution.
-  - `/test-run`: A test endpoint to demonstrate running commands inside a Docker container.
+### 📦 **Pluggable Runners & Custom Images**
+- **Docker container execution** with custom images
+- **Environment variable injection**
+- **Working directory configuration**
+- **Timeout management** for long-running tasks
 
-- **Docker Integration**:
-  - Uses Node.js `child_process.exec` to run Docker CLI commands for container management.
+### 🔄 **Git Integration**
+- **Webhook support** for automatic pipeline triggering
+- **Repository cloning** and management
+- **Branch and tag filtering**
+- **Event-based triggers** (push, pull request, etc.)
 
-- **Git Operations**:
-  - Utilizes `simple-git` to clone repositories based on webhook payloads.
-
-## Future Enhancements
-
-- **Pipeline Configuration**: Implement a configuration system to define complex pipelines with multiple steps.
-- **User Interface**: Develop a web-based UI for easier management and monitoring of pipelines.
-- **Authentication and Authorization**: Add security features to manage access to the API and pipelines.
-- **Advanced Logging and Monitoring**: Integrate logging and monitoring solutions for better visibility into pipeline executions.
-
-## Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Docker installed on your server.
-- Node.js installed.
-- (Optional) pnpm installed for package management.
+- **Docker** installed and running
+- **Node.js** (v18 or higher)
+- **pnpm** (recommended) or npm
 
 ### Installation
 
-1. Clone the repository:
-
+1. **Clone the repository:**
    ```bash
    git clone <repository-url>
+   cd CicadaCI/cicada-api
    ```
-2. Install dependencies:
-    ```bash 
-    pnpm install
-    # or
-    npm install
-    ```
-3. Start the development server:
-    ```bash 
-    pnpm run dev
-    # or
-    npm run dev
-    ```
-## Usage
 
-1. **Configure Webhooks**  
-   Set up a webhook in your Git repository to point to the `/webhook` endpoint of your CicadaCI instance:
-    ```bash 
-    curl -X POST http://localhost:3000/webhook \
-     -H "Content-Type: application/json" \
-     -d '{"repository":{"clone_url":"https://github.com/your/repo.git","name":"repo"}}'
-    ```
-2. **Test Docker Integration**  
-Use the `/test-run` endpoint to verify that Docker containers are being executed correctly.
+2. **Install dependencies:**
+   ```bash
+   pnpm install
+   ```
 
-3. **Example Webhook POST Request (using curl)** 
-    You can manually trigger the webhook for testing using the following `curl` command:
-    ```bash
-    curl -X POST http://localhost:3000/webhook \
-    -H "Content-Type: application/json" \
-    -d '{
+3. **Start the development server:**
+   ```bash
+   pnpm run dev
+   ```
+
+4. **Access the application:**
+   - **API**: http://localhost:3000
+   - **Dashboard**: http://localhost:3000
+   - **Default credentials**: 
+     - Admin: `admin` / `admin123`
+     - User: `user` / `user123`
+
+## 📋 Pipeline Configuration
+
+Create a `.cicadaci.yml` file in your repository root:
+
+```yaml
+version: "1.0"
+name: "My Pipeline"
+description: "A sample pipeline configuration"
+
+triggers:
+  branches: ["main", "develop"]
+  events: ["push", "pull_request"]
+
+environment:
+  NODE_ENV: "production"
+
+steps:
+  - name: "install-dependencies"
+    image: "node:18-alpine"
+    commands:
+      - "npm ci"
+    workingDir: "/workspace"
+    timeout: 300000
+
+  - name: "run-tests"
+    image: "node:18-alpine"
+    commands:
+      - "npm test"
+    dependsOn: ["install-dependencies"]
+    timeout: 300000
+
+  - name: "build"
+    image: "node:18-alpine"
+    commands:
+      - "npm run build"
+    dependsOn: ["run-tests"]
+    timeout: 300000
+```
+
+## 🔧 API Endpoints
+
+### Authentication
+- `POST /api/auth/login` - User login
+- `POST /api/auth/register` - User registration
+- `GET /api/auth/me` - Get current user info
+
+### Pipeline Management
+- `GET /api/runs` - List all pipeline runs
+- `GET /api/runs/:runId` - Get specific run details
+- `POST /api/runs/:runId/cancel` - Cancel a running pipeline
+
+### Webhooks
+- `POST /webhook` - Trigger pipeline from Git webhook
+
+### Health & Testing
+- `GET /health` - Health check endpoint
+- `GET /test-run` - Test Docker container execution
+
+## 🎯 Usage Examples
+
+### 1. Trigger Pipeline via Webhook
+```bash
+curl -X POST http://localhost:3000/webhook \
+  -H "Content-Type: application/json" \
+  -d '{
     "repository": {
-      "clone_url": "https://github.com/your-username/your-repo.git",
+      "clone_url": "https://github.com/your/repo.git",
       "name": "your-repo"
     }
-     }'
-     ```
-## More Updates Coming 🚧
+  }'
+```
 
-CicadaCI is actively under development. Here's what i am working on next:
+### 2. Login and Get Pipeline Runs
+```bash
+# Login
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "admin123"}'
 
-- 🎛️ **Pipeline Configuration File** (e.g., `.cicadaci.yml`) for defining multi-step builds  
-- 🧑‍💻 **Web UI Dashboard** to visualize pipeline status, logs, and run history  
-- 🔐 **Authentication & RBAC** to control access  
-- 📊 **Advanced Logging and Monitoring** with timestamps and real-time logs  
-- 📦 **Pluggable Runners** and support for custom build images  
+# Use the returned token
+curl -X GET http://localhost:3000/api/runs \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+```
 
-Thank_you! :)
+### 3. Cancel a Running Pipeline
+```bash
+curl -X POST http://localhost:3000/api/runs/RUN_ID/cancel \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+```
+
+## 🏗️ Architecture
+
+### Core Components
+
+1. **Pipeline Parser** (`src/services/pipelineParser.ts`)
+   - YAML configuration parsing and validation
+   - Dependency resolution and circular dependency detection
+
+2. **Pipeline Executor** (`src/services/pipelineExecutor.ts`)
+   - Step execution with dependency management
+   - Parallel execution of independent steps
+   - Real-time logging and status tracking
+
+3. **Authentication Service** (`src/services/authService.ts`)
+   - JWT token management
+   - Role-based access control
+   - User management
+
+4. **Docker Runner** (`src/dockerRunner.ts`)
+   - Container execution with custom options
+   - Environment variable injection
+   - Timeout management
+
+5. **Web UI** (`src/public/index.html`)
+   - Vue.js-based dashboard
+   - Real-time updates via polling
+   - Responsive design with Tailwind CSS
+
+### Data Flow
+
+1. **Webhook Trigger** → Repository Clone → Pipeline Config Detection
+2. **Pipeline Execution** → Step Dependency Resolution → Container Execution
+3. **Real-time Logging** → Web UI Updates → User Monitoring
+4. **Authentication** → Role-based Access → API Endpoints
+
+## 🔒 Security Features
+
+- **JWT Authentication** with configurable expiration
+- **Role-based Access Control** with granular permissions
+- **Secure token storage** in browser localStorage
+- **Input validation** and sanitization
+- **Error handling** without sensitive data exposure
+
+## 📈 Monitoring & Observability
+
+- **Real-time pipeline status** updates
+- **Step-by-step execution** tracking
+- **Comprehensive logging** with structured data
+- **Performance metrics** and execution times
+- **Error tracking** with detailed stack traces
+
+## 🚧 Development Status
+
+✅ **Completed Features:**
+- Pipeline configuration system
+- Web UI dashboard
+- Authentication & RBAC
+- Advanced logging and monitoring
+- Pluggable runners and custom images
+- Git integration with webhooks
+- Real-time pipeline monitoring
+- Step dependency management
+- Container execution with custom options
+
+## 📄 License
+
+This project is licensed under the ISC License.
+
+---
+
+**CicadaCI** - Making CI/CD simple, powerful, and self-hosted! 🚀

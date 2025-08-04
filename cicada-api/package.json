@@ -13,9 +13,17 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@types/bcryptjs": "^3.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/uuid": "^10.0.0",
+    "bcryptjs": "^3.0.2",
     "dockerode": "^4.0.6",
     "express": "^5.1.0",
-    "simple-git": "^3.27.0"
+    "js-yaml": "^4.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "simple-git": "^3.27.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/dockerode": "^3.3.39",

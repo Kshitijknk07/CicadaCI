@@ -1,0 +1,21 @@
+version: "1.0"
+name: "Simple Test Pipeline"
+description: "A simple test pipeline for demonstration"
+
+steps:
+  - name: "hello-world"
+    image: "alpine:latest"
+    commands:
+      - "echo 'Hello from CicadaCI!'"
+      - "echo 'Pipeline step completed successfully'"
+    timeout: 60000
+
+  - name: "system-info"
+    image: "alpine:latest"
+    commands:
+      - "uname -a"
+      - "echo 'Current directory:' && pwd"
+      - "echo 'Directory contents:' && ls -la"
+    dependsOn:
+      - "hello-world"
+    timeout: 60000 
