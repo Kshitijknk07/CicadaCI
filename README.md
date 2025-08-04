@@ -68,12 +68,23 @@
    pnpm run dev
    ```
 
-4. **Access the application:**
+4. **Set up environment variables:**
+   ```bash
+   # Copy the example environment file
+   cp .env.example .env
+   
+   # Edit .env and set your own secure values
+   JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+   ADMIN_PASSWORD=your-secure-admin-password
+   USER_PASSWORD=your-secure-user-password
+   ```
+
+5. **Access the application:**
    - **API**: http://localhost:3000
    - **Dashboard**: http://localhost:3000
-   - **Default credentials**: 
-     - Admin: `admin` / `admin123`
-     - User: `user` / `user123`
+   - **Default credentials** (set via environment variables):
+     - Admin: `admin` / `[ADMIN_PASSWORD]`
+     - User: `user` / `[USER_PASSWORD]`
 
 ## 📋 Pipeline Configuration
 
@@ -149,10 +160,10 @@ curl -X POST http://localhost:3000/webhook \
 
 ### 2. Login and Get Pipeline Runs
 ```bash
-# Login
+# Login (replace with your actual password)
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "admin123"}'
+  -d '{"username": "admin", "password": "your-admin-password"}'
 
 # Use the returned token
 curl -X GET http://localhost:3000/api/runs \
@@ -208,6 +219,27 @@ curl -X POST http://localhost:3000/api/runs/RUN_ID/cancel \
 - **Input validation** and sanitization
 - **Error handling** without sensitive data exposure
 
+### 🔐 Security Configuration
+
+**IMPORTANT**: Before running in production, ensure you:
+
+1. **Set secure environment variables**:
+   ```bash
+   JWT_SECRET=your-super-secret-jwt-key-at-least-32-characters
+   ADMIN_PASSWORD=your-secure-admin-password
+   USER_PASSWORD=your-secure-user-password
+   ```
+
+2. **Use strong passwords** (minimum 12 characters, mix of letters, numbers, symbols)
+
+3. **Change default credentials** immediately after first login
+
+4. **Use HTTPS** in production environments
+
+5. **Regularly rotate JWT secrets** and passwords
+
+6. **Monitor logs** for suspicious activity
+
 ## 📈 Monitoring & Observability
 
 - **Real-time pipeline status** updates
@@ -217,6 +249,13 @@ curl -X POST http://localhost:3000/api/runs/RUN_ID/cancel \
 - **Error tracking** with detailed stack traces
 
 ## 🚧 Development Status
+
+⚠️ **Security Notice**: This is a development/demo version. For production use:
+- Set secure environment variables
+- Use strong passwords
+- Enable HTTPS
+- Implement proper user management
+- Add rate limiting and security headers
 
 ✅ **Completed Features:**
 - Pipeline configuration system

@@ -10,8 +10,10 @@ import {
   RegisterRequest,
 } from "../types/auth";
 
-const JWT_SECRET =
-  process.env.JWT_SECRET || "your-secret-key-change-in-production";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
 const JWT_EXPIRES_IN = "24h";
 
 export class AuthService {
@@ -60,10 +62,11 @@ export class AuthService {
       (u) => u.role === UserRole.ADMIN
     );
     if (!adminExists) {
+      const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
       await this.register({
         username: "admin",
         email: "admin@cicadaci.com",
-        password: "admin123",
+        password: adminPassword,
         role: UserRole.ADMIN,
       });
     }
@@ -101,7 +104,10 @@ export class AuthService {
 
     // For demo purposes, we'll use a simple password check
     // In production, you'd store hashed passwords
-    if (request.password !== "admin123" && request.password !== "user123") {
+    const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
+    const userPassword = process.env.USER_PASSWORD || "user123";
+    
+    if (request.password !== adminPassword && request.password !== userPassword) {
       throw new Error("Invalid credentials");
     }
 

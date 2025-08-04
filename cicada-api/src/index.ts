@@ -240,6 +240,6 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
 app.listen(port, () => {
   console.log(`🚀 CicadaCI API running at http://localhost:${port}`);
   console.log(`📊 Dashboard available at http://localhost:${port}`);
-  console.log(`🔐 Default admin credentials: admin / admin123`);
-  console.log(`👤 Default user credentials: user / user123`);
+  console.log(`🔐 Default admin credentials: admin / [set via ADMIN_PASSWORD env var]`);
+  console.log(`👤 Default user credentials: user / [set via USER_PASSWORD env var]`);
 });
